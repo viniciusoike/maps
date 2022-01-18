@@ -8,6 +8,6 @@
 
 Data from [INFORMSP](http://www.respeitoavida.sp.gov.br/relatorios/)
 
-![](https://github.com/viniciusoike/maps/graphics/1_road_accidents/map.pdf?raw=true)
+![](https://github.com/viniciusoike/maps/raw/main/graphics/1_road_accidents/map.pdf)
 
 
