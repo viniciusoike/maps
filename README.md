@@ -1,13 +1,13 @@
 # 30 Days Map Challenge
 
-![]("https://github.com/viniciusoike/maps/challenge.png.webm?raw=TRUE")
+![]("https://raw.githubusercontent.com/viniciusoike/maps/main/challenge.png.webp")
 
-# 1. Fatal Road Accidents in Sao Paulo
+# 1. [Points] Fatal Road Accidents in Sao Paulo
 
-- [Road Accidents in Sao Paulo](https://github.com/viniciusoike/tidy_tuesday/blob/main/R/t-11-02)
+- [Road Accidents in Sao Paulo](https://github.com/viniciusoike/maps/blob/main/R/1_road_accidents.R)
+
+
+![](https://github.com/viniciusoike/maps/blob/main/graphics/1_road_accidents/map.png?raw=true)
+
 
 Data from [INFORMSP](http://www.respeitoavida.sp.gov.br/relatorios/)
-
-![](https://github.com/viniciusoike/maps/raw/main/graphics/1_road_accidents/map.pdf)
-
-
