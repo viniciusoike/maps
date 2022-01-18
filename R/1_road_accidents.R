@@ -117,14 +117,18 @@ p_fatal <- ggplot() +
     ylim = c(-23.7, -23.475),
     xlim = c(-46.75, -46.55)
     ) +
-  labs(title = "Fatal Accidents in Sao Paulo",
+  labs(title = "Fatal Accidents in Sao Paulo 2019",
        subtitle = "Total number of fatal car accidents in Sao Paulo (BR)") +
-  guides(color= guide_legend(), size=guide_legend()) +
+  guides(color = guide_legend(), size = guide_legend()) +
   theme_void() +
   theme(
     legend.position = "bottom",
-    plot.title = element_text(size = 20, family = "Gill Sans", face = "bold", hjust=.5),
-    plot.subtitle = element_text(size = 12, family = "Gill Sans"),
+    plot.title = element_text(
+      size = 20, family = "Gill Sans", face = "bold", hjust = 0.5
+      ),
+    plot.subtitle = element_text(
+      size = 12, family = "Gill Sans", hjust = 0.5
+      ),
     legend.title = element_text(size = 8, family = "Gill Sans")
   )
 
@@ -132,4 +136,10 @@ ggsave(file = here("graphics", "1_road_accidents", "map.pdf"),
        p_fatal,
        units = "in",
        width = 6,
-       height=7)
+       height = 7)
+
+ggsave(file = here("graphics", "1_road_accidents", "map.png"),
+       p_fatal,
+       units = "in",
+       width = 6,
+       height = 7)
