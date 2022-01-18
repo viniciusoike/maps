@@ -95,12 +95,13 @@ small_streets <- osmdata_sf(q = qr_small_streets, quiet = FALSE)
 # Plot --------------------------------------------------------------------
 
 p_fatal <- ggplot() +
-  geom_sf(data = big_streets$osm_lines,
-          inherit.aes = FALSE,
-          color = "gray20") +
   geom_sf(data = med_streets$osm_lines,
           inherit.aes = FALSE,
-          color = "gray60") +
+          color = "gray70",
+          size = 0.5) +
+  geom_sf(data = big_streets$osm_lines,
+          inherit.aes = FALSE,
+          color = "gray25") +
   geom_sf(data = filter(geofatal, year == 2019),
           aes(color = victims, size = victims)) +
   scale_colour_viridis_c(
@@ -141,5 +142,6 @@ ggsave(file = here("graphics", "1_road_accidents", "map.pdf"),
 ggsave(file = here("graphics", "1_road_accidents", "map.png"),
        p_fatal,
        units = "in",
-       width = 6,
-       height = 7)
+       width = 4,
+       height = 5,
+       dpi = 300)
