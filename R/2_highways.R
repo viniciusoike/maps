@@ -165,7 +165,7 @@ p1 <- ggplot() +
     palette = 8
   ) +
   labs(
-    title = "**Nomes de Ruas em Porto Alegre**",
+    title = "**Origem do Nome de Ruas em Porto Alegre**",
     subtitle = sub,
     caption = "Fonte: osmdata. Cores: ColorBrewer. Autor: @viniciusoike"
   ) +
@@ -187,7 +187,7 @@ p1 <- ggplot() +
     
     plot.subtitle = element_markdown(
       family = "Gill Sans",
-      size = 10,
+      size = 11,
       colour = "gray20"
     ),
     
@@ -200,8 +200,15 @@ p1 <- ggplot() +
     legend.margin = margin(t = 0.5, b = 0.5, unit = "cm")
   )
 
-cowplot::save_plot(here::here("test.png"),
+cowplot::save_plot(here::here("graphics/2_porto_alegre_streets/street_maps.png"),
                    p1,
                    base_height = 10,
                    dpi = 300)
+
+ggsave(here::here("graphics/2_porto_alegre_streets/street_maps.pdf"),
+       units = "in",
+       width = 6,
+       height = 7,
+       device = "pdf")
+
 
