@@ -26,20 +26,6 @@ bbox <- getbb("Porto Alegre Brazil")
 # Base query
 qr <- opq(bbox)
 
-osmdata::available_features()
-osmdata::available_tags("landuse")
-
-qr_water <- add_osm_feature(qr, key = "water", value = c("river", "lake"))
-water <- osmdata_sf(qr_water)
-mapview(water$osm_polygons)
-
-qr_green <- add_osm_feature(qr, key = "landuse", value = c("grass", "forest"))
-green <- osmdata_sf(qr_green)
-mapview(green$osm_polygons)
-qr_forest <- add_osm_feature(qr, key = "forestry")
-forest <- osmdata_sf(qr_forest)
-
-
 # Add feature requests to query
 
 # All roads
@@ -183,11 +169,13 @@ s3 <- small_streets$osm_lines %>%
   left_join(dictionary, by = c("name" = "street_name"))
 
 sub <- "
-<p style='line-height:0.8'> A maior parte das ruas (~38%) têm nome de personalidades históricas (e.g. <span style='color: #fdb462'><strong>Rua Vicente da Fontoura</strong></span>) ou de outras cidades/UFs (~28%) (e.g. <span style='color: #80b1d3'><strong>Av. Bento Goncalves</strong></span>).<br/>
+<p style='line-height:0.9'> A maior parte das ruas (~38%) têm nome de personalidades históricas (e.g. <span style='color: #fdb462'><strong>Rua Vicente da Fontoura</strong></span>) ou de outras cidades/UFs (~28%) (e.g. <span style='color: #80b1d3'><strong>Av. Paraná</strong></span>).<br/>
 H&aacute; 208 ruas nomeadas em homenagem a membros do ex&eacute;rcito (e.g. <span style='color: #b15928;'><strong>Av. Presidente Castelo Branco</strong></span>).<br/>
 As ruas sem nome (e.g. <span style='color: #e78ac3;'><strong>Beco A<strong></span>, <span style='color: #e78ac3;'><strong>Rua 2<strong></span>) majoritariamente se concentram em aglomerados subnormais.<br/>
-A categoria profiss&atilde;o re&uacute;ne as ruas que usam um t&iacute;tulo (e.g. <span style='color: #b3de69';><strong>Doutor Flores<strong></span>). H&aacute; 103 ruas com nomes de professores (e.g. <span style='color: #b3de69';><strong>Rua Professor Fitzgerald<strong></span>).
-<br/></p>"
+A categoria profiss&atilde;o re&uacute;ne as ruas que usam um t&iacute;tulo (e.g. <span style='color: #b3de69';><strong>Doutor Flores<strong></span>). H&aacute; 103 ruas com nomes de professores (e.g. <span style='color: #b3de69';><strong>Rua Professor Fitzgerald<strong></span>).<br/>
+Algumas ruas podem ser classificadas em mais do que um  grupo como a <span><strong>Av. Bento Gonçalves<strong></span> (município ou personalidade histórica) <br/>
+ou <span><strong>Av. Senador Salgado Filho<strong></span> (município, personalidade histórica ou profissão) </span>.<br/>
+</p>"
 
 cores <- RColorBrewer::brewer.pal(8, "Set3")
 cores[2] <- "#b15928"
@@ -223,16 +211,6 @@ p1 <- ggplot() +
     name = "",
     values = cores
   ) +
-  # scale_color_brewer(
-  #   name = "",
-  #   type = "qual",
-  #   palette = 8
-  # ) +
-  # scale_fill_brewer(
-  #   name = "",
-  #   type = "qual",
-  #   palette = 8
-  # ) +
   labs(
     title = "**Origem do Nome de Ruas em Porto Alegre**",
     subtitle = sub,
@@ -271,5 +249,5 @@ p1 <- ggplot() +
 
 cowplot::save_plot(here::here("graphics/2_porto_alegre_streets/street_maps.png"),
                    p1,
-                   base_height = 9,
+                   base_height = 10,
                    dpi = 300)
