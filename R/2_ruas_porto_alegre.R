@@ -26,6 +26,18 @@ bbox <- getbb("Porto Alegre Brazil")
 # Base query
 qr <- opq(bbox)
 
+osmdata::available_features()
+osmdata::available_tags("landuse")
+
+qr_water <- add_osm_feature(qr, key = "water", value = c("river", "lake"))
+water <- osmdata_sf(qr_water)
+mapview(water$osm_polygons)
+
+qr_green <- add_osm_feature(qr, key = "landuse", value = c("grass", "forest"))
+green <- osmdata_sf(qr_green)
+mapview(green$osm_polygons)
+qr_forest <- add_osm_feature(qr, key = "forestry")
+forest <- osmdata_sf(qr_forest)
 
 
 # Add feature requests to query
@@ -75,6 +87,7 @@ dictionary <- tibble(
 
 # Get names of all cities and states in Brazil
 muni <- read_municipality()
+muni <- filter(muni, code_state == 43)
 state <- read_state()
 geonames <- c(muni$name_muni, state$name_state)
 geostring <- paste(geonames, collapse = "|")
@@ -82,19 +95,47 @@ geostring <- paste(geonames, collapse = "|")
 # Common titles for army position, liberal professions, and religious
 # personalities
 posto_exercito <- c("Marechal", "Almirante", "General", "Comandante", "Coronel",
-                    "Cabo", "Capitão", "(Castello Branco)", "(Costa e Silva)",
+                    "Cabo", "Capitão", "Brigadeiro", "Tenente",
+                    "(Castello Branco)", "(Costa e Silva)",
                     "(Ernesto Geisel)")
 
 profissao <- c("Engenheir", "Doutor", "Profess", "Desembargador")
 
-santidade <- c("Frei", "Santo", "Santa", "São", "Padre")
+santidade <- c("Frei", "Santo", "Santa", "São", "Padre", "Papa")
 
 posto_exercito <- paste(posto_exercito, collapse = "|")
 profissao <- paste(profissao, collapse = "|")
 santidade <- paste(santidade, collapse = "|")
 # Proxy for closed condominiums / favelas
-rua_sem_nome <- c(
-  "(Rua [0-9])|(Beco [0-9])|(Travessa [0-9])|(Via [0-9])|(Viela [0-9])|(^Acesso)|(Rua [A-Z] )")
+
+cardinais <- c("Um", "Dois", "Três", "Quatro", "Cinco", "Seis", "Sete", "Oito",
+               "Nove", "Dez", "Onze", "Doze", "Treze", "Catorze", "Quatorze",
+               "Quinze", "Dezesseis", "Dezesete", "Dezoito", "Dezenove", "Vinte",
+               "Vinte e Um", "Vinte e Dois", "Vinte e Três", "Vinte e Quatro",
+               "Vinte e Cinco", "Vinte e Seis", "Vinte e Sete", "Vinte e Oito",
+               "Vinte e Nove", "Trinta", "Quarenta", "Cinquenta", "Sessenta",
+               "Setenta", "Oitenta", "Noventa", "Cem")
+
+cardinais <- paste(paste0("(Rua ", cardinais, ")"), collapse = "|")
+
+str_detect("Acesso 2", rx_acesso)
+
+rx_acesso <- "(^Acesso+)"
+rx_alameda <- "(Alameda [0-9])|(Alameda [A-Z][0-9])|(Alameda [0-9]$)|(Alameda [0-9][0-9]$)|(Alameda [0-9][0-9][0-9]$)|(Alameda [0-9][0-9][0-9][A-Z]$)|(Alameda [A-Z]$)|(Alameda [A-Z][A-Z]$)|(Alameda [A-Z][A-Z][A-Z]$)"
+rx_beco <- "(^Beco+)"
+rx_caminho <- "(^Caminho+)"
+rx_rua <- "(Rua [0-9])|(Rua [A-Z][0-9])|(Rua [0-9]$)|(Rua [0-9][0-9]$)|(Rua [0-9][0-9][0-9]$)|(Rua [0-9][0-9][0-9][A-Z]$)|(Rua [A-Z]$)|(Rua [A-Z][A-Z]$)|(Rua [A-Z][A-Z][A-Z]$)"
+rx_travessa <- "(Travessa [0-9])|(Travessa [A-Z][0-9])|(Travessa [0-9]$)|(Travessa [0-9][0-9]$)|(Travessa [A-Z]$)|(Travessa [A-Z][A-Z]$)"
+rx_avenida <- "(Avenida [0-9])|(Avenida [A-Z][0-9])|(Avenida [0-9]$)|(Avenida [0-9][0-9]$)|(Avenida [A-Z]$)|(Avenida [A-Z][A-Z]$)"
+rx_via <- "(Via [0-9])|(Via [A-Z][0-9])|(Via [0-9]$)|(Via [0-9][0-9]$)|(Via [A-Z]$)|(Via [A-Z][A-Z]$)"
+rx_viela <- "(Viela [0-9])|(Viela [A-Z][0-9])|(Viela [0-9]$)|(Viela [0-9][0-9]$)|(Viela [A-Z]$)|(Viela [A-Z][A-Z]$)"
+
+rua_sem_nome <- paste(
+  rx_acesso, rx_alameda, rx_beco, rx_caminho,
+  rx_rua, rx_travessa, rx_avenida, rx_via, rx_viela,
+  sep = "|")
+
+rua_sem_nome <- paste(rua_sem_nome, cardinais, sep = "|")
 
 dictionary <- dictionary %>%
   mutate(
@@ -111,6 +152,24 @@ dictionary <- dictionary %>%
     )
   )
 
+# Ajustes manuais
+dictionary <- dictionary %>%
+  mutate(
+    class = if_else(str_detect(street_name, "Carlos Gomes"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Getúlio Vargas"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Protásio Alves"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Salgado Filho"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Salgado Filho"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Mário Tavares Haussen"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Donário Braga"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "Joracy Camargo"), "Personalidade Histórica", class),
+    class = if_else(str_detect(street_name, "(Beira Rio)|(Beira Rio)"), "Coisa", class),
+    class = if_else(str_detect(street_name, "Ipiranga"), "Coisa", class)
+    
+  )
+
+write_csv(dictionary, here::here("data/dictionary_street_names_poa.csv"))
+
 s1 <- big_streets$osm_lines %>%
   st_transform(crs = 4674) %>%
   left_join(dictionary, by = c("name" = "street_name"))
@@ -123,47 +182,57 @@ s3 <- small_streets$osm_lines %>%
   st_transform(crs = 4674) %>%
   left_join(dictionary, by = c("name" = "street_name"))
 
-
 sub <- "
 <p style='line-height:0.8'> A maior parte das ruas (~38%) têm nome de personalidades históricas (e.g. <span style='color: #fdb462'><strong>Rua Vicente da Fontoura</strong></span>) ou de outras cidades/UFs (~28%) (e.g. <span style='color: #80b1d3'><strong>Av. Bento Goncalves</strong></span>).<br/>
-H&aacute; 208 ruas nomeadas em homenagem a membros do ex&eacute;rcito (e.g. <span style='color: #ffffb3;'><strong>Av. Presidente Castelo Branco</strong></span>).<br/>
+H&aacute; 208 ruas nomeadas em homenagem a membros do ex&eacute;rcito (e.g. <span style='color: #b15928;'><strong>Av. Presidente Castelo Branco</strong></span>).<br/>
 As ruas sem nome (e.g. <span style='color: #e78ac3;'><strong>Beco A<strong></span>, <span style='color: #e78ac3;'><strong>Rua 2<strong></span>) majoritariamente se concentram em aglomerados subnormais.<br/>
 A categoria profiss&atilde;o re&uacute;ne as ruas que usam um t&iacute;tulo (e.g. <span style='color: #b3de69';><strong>Doutor Flores<strong></span>). H&aacute; 103 ruas com nomes de professores (e.g. <span style='color: #b3de69';><strong>Rua Professor Fitzgerald<strong></span>).
 <br/></p>"
 
-
+cores <- RColorBrewer::brewer.pal(8, "Set3")
+cores[2] <- "#b15928"
+cores[8] <- "#e78ac3"
+   
 p1 <- ggplot() +
   geom_sf(
-    data = s1,
+    data = filter(s1, !is.na(class)),
     aes(color = class),
     key_glyph = draw_key_rect
   ) +
   geom_sf(
-    data = s2,
+    data = filter(s2, !is.na(class)),
     aes(color = class),
     key_glyph = draw_key_rect,
-    size = 0.55
+    size = 0.6
   ) +
   geom_sf(
-    data = s3,
+    data = filter(s3, !is.na(class)),
     aes(color = class),
     key_glyph = draw_key_rect,
-    size = 0.4
+    size = 0.45
   ) +
   coord_sf(
     ylim = c(-30.07, -30),
     xlim = c(-51.245, -51.135)
   ) +
-  scale_color_brewer(
+  scale_colour_manual(
     name = "",
-    type = "qual",
-    palette = 8
+    values = cores
   ) +
-  scale_fill_brewer(
+  scale_fill_manual(
     name = "",
-    type = "qual",
-    palette = 8
+    values = cores
   ) +
+  # scale_color_brewer(
+  #   name = "",
+  #   type = "qual",
+  #   palette = 8
+  # ) +
+  # scale_fill_brewer(
+  #   name = "",
+  #   type = "qual",
+  #   palette = 8
+  # ) +
   labs(
     title = "**Origem do Nome de Ruas em Porto Alegre**",
     subtitle = sub,
@@ -171,8 +240,8 @@ p1 <- ggplot() +
   ) +
   theme_void() +
   theme(
-    plot.background = element_rect(fill = "gray70", colour = "gray70"),
-    panel.background = element_rect(fill = "gray70", colour = "gray70"),
+    plot.background = element_rect(fill = "#f0f0f0", colour = "#f0f0f0"),
+    panel.background = element_rect(fill = "#f0f0f0", colour = "#f0f0f0"),
     legend.position = c(0.1, 0.8),
     
     plot.margin = margin(t = 1.5, b = 1, unit = "cm"),
@@ -194,21 +263,13 @@ p1 <- ggplot() +
     panel.border = element_rect(colour = "gray20", fill = "transparent"),
     
     legend.title = element_blank(),
-    legend.background = element_rect(fill = "gray70", colour = "gray70"),
-    legend.box.background = element_rect(fill = "gray70", colour = "gray70"),
+    legend.background = element_rect(fill = "#f0f0f0", colour = "#f0f0f0"),
+    legend.box.background = element_rect(fill = "#f0f0f0", colour = "#f0f0f0"),
     legend.text = element_text(size = 11),
     legend.margin = margin(t = 0.5, b = 0.5, unit = "cm")
   )
 
 cowplot::save_plot(here::here("graphics/2_porto_alegre_streets/street_maps.png"),
                    p1,
-                   base_height = 10,
+                   base_height = 9,
                    dpi = 300)
-
-ggsave(here::here("graphics/2_porto_alegre_streets/street_maps.pdf"),
-       units = "in",
-       width = 6,
-       height = 7,
-       device = "pdf")
-
-
